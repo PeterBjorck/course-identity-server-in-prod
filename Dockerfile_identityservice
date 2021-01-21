@@ -1,0 +1,42 @@
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+
+WORKDIR /src
+
+# Phase #1, copy solution + csproj and restore as distinct layers  ----
+COPY *.sln .
+COPY Client/*.csproj ./Client/
+COPY Infrastructure/*.csproj ./Infrastructure/
+COPY PaymentAPI/*.csproj ./PaymentAPI/
+COPY IdentityService/*.csproj ./IdentityService/
+
+RUN dotnet restore
+
+
+# Phase #2, copy everything and build app ------------------------------
+COPY . .
+
+WORKDIR "/src/IdentityService"
+
+RUN dotnet --list-sdks
+
+RUN dotnet publish IdentityService.csproj -c Release -o /app/IdentityService
+
+# Phase #3, Build final image ------------------------------------------
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS release
+
+RUN dotnet --list-sdks
+
+#Set by the build-server
+ARG buildnumber="unknown"
+
+COPY --from=build /app/IdentityService .
+
+EXPOSE 80
+EXPOSE 443
+
+WORKDIR /
+
+ENTRYPOINT ["dotnet", "IdentityService.dll"]
+
+RUN echo "buildversion=$buildversion\n"
+RUN echo "buildnumber=$buildnumber\n"

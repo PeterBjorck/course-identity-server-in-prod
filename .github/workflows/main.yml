@@ -1,0 +1,190 @@
+# https://docs.microsoft.com/en-us/azure/container-instances/container-instances-github-action
+on: [push]
+name: Linux_Container_Workflow 
+
+ 
+jobs:
+   #Deploy the client part of the project
+    build-and-deploy-client:
+        runs-on: ubuntu-latest
+        steps:
+
+        - name: 'Checkout the repo'
+          uses: actions/checkout@v2
+        
+        - name: Set up Docker Buildx
+          id: buildx
+          uses: docker/setup-buildx-action@v1
+          
+        - name: Builder instance name
+          run: echo ${{ steps.buildx.outputs.name }}
+            
+        - name: Cache Docker layers
+          uses: actions/cache@v2
+          with:
+            path: /tmp/.buildx-cache-client
+            key: ${{ runner.os }}-buildx-client-${{ github.sha }}
+            restore-keys: |
+              ${{ runner.os }}-buildx-client-
+           
+        - name: 'Login to Azure'
+          uses: azure/login@v1.1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+        - name: Login to Container Registry
+          uses: docker/login-action@v1
+          with:
+            registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+                      
+        - name: 'Build and push to registry'
+          id: docker_build
+          uses: docker/build-push-action@v2
+          with:
+            builder: ${{ steps.buildx.outputs.name }}
+            file: ./Dockerfile_client
+            push: true
+            tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ secrets.USERNAME }}-client:${{ github.sha }}
+            cache-from: type=local,src=/tmp/.buildx-cache-client
+            cache-to: type=local,dest=/tmp/.buildx-cache-client
+
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: 'IdentityServerCourse'
+            dns-name-label: ${{ secrets.USERNAME }}-client
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ secrets.USERNAME }}-client:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: ${{ secrets.USERNAME }}-client
+            ports: 80 443
+            location: 'northeurope'
+            environment-variables: ASPNETCORE_ENVIRONMENT=Production TZ=Europe/Stockholm Vault__Url=${{ secrets.AZURE_VAULTURL }} Vault__ClientId=${{ secrets.AZURE_CLIENTID }} Vault__Secret=${{ secrets.AZURE_SECRET }} Vault__TenantID=${{ secrets.AZURE_TENANTID }} GITHUB__SHA=${{ github.sha }}
+
+
+   #Deploy the identity part of the project
+    build-and-deploy-identity:
+        runs-on: ubuntu-latest
+        steps:
+
+        - name: 'Checkout the repo'
+          uses: actions/checkout@v2
+        
+        - name: Set up Docker Buildx
+          id: buildx
+          uses: docker/setup-buildx-action@v1
+          
+        - name: Builder instance name
+          run: echo ${{ steps.buildx.outputs.name }}
+            
+        - name: Cache Docker layers
+          uses: actions/cache@v2
+          with:
+            path: /tmp/.buildx-cache-identity
+            key: ${{ runner.os }}-buildx-identity-${{ github.sha }}
+            restore-keys: |
+              ${{ runner.os }}-buildx-identity-
+           
+        - name: 'Login to Azure'
+          uses: azure/login@v1.1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+        - name: Login to Container Registry
+          uses: docker/login-action@v1
+          with:
+            registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+                      
+        - name: 'Build and push to registry'
+          id: docker_build
+          uses: docker/build-push-action@v2
+          with:
+            builder: ${{ steps.buildx.outputs.name }}
+            file: ./Dockerfile_identityservice
+            push: true
+            tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ secrets.USERNAME }}-identityservice:${{ github.sha }}
+            cache-from: type=local,src=/tmp/.buildx-cache-identity
+            cache-to: type=local,dest=/tmp/.buildx-cache-identity
+
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: 'IdentityServerCourse'
+            dns-name-label: ${{ secrets.USERNAME }}-identityservice
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ secrets.USERNAME }}-identityservice:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: ${{ secrets.USERNAME }}-identityservice
+            ports: 80 443
+            location: 'northeurope'
+            environment-variables: ASPNETCORE_ENVIRONMENT=Production TZ=Europe/Stockholm Vault__Url=${{ secrets.AZURE_VAULTURL }} Vault__ClientId=${{ secrets.AZURE_CLIENTID }} Vault__Secret=${{ secrets.AZURE_SECRET }} Vault__TenantID=${{ secrets.AZURE_TENANTID }} GITHUB__SHA=${{ github.sha }}
+
+
+   #Deploy the Payment API part of the project
+    build-and-deploy-payment:
+        runs-on: ubuntu-latest
+        steps:
+
+        - name: 'Checkout the repo'
+          uses: actions/checkout@v2
+        
+        - name: Set up Docker Buildx
+          id: buildx
+          uses: docker/setup-buildx-action@v1
+          
+        - name: Builder instance name
+          run: echo ${{ steps.buildx.outputs.name }}
+            
+        - name: Cache Docker layers
+          uses: actions/cache@v2
+          with:
+            path: /tmp/.buildx-cache-payment
+            key: ${{ runner.os }}-buildx-payment-${{ github.sha }}
+            restore-keys: |
+              ${{ runner.os }}-buildx-payment
+           
+        - name: 'Login to Azure'
+          uses: azure/login@v1.1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+        - name: Login to Container Registry
+          uses: docker/login-action@v1
+          with:
+            registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+                      
+        - name: 'Build and push to registry'
+          id: docker_build
+          uses: docker/build-push-action@v2
+          with:
+            builder: ${{ steps.buildx.outputs.name }}
+            file: ./Dockerfile_paymentapi
+            push: true
+            tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ secrets.USERNAME }}-paymentapi:${{ github.sha }}
+            cache-from: type=local,src=/tmp/.buildx-cache-payment
+            cache-to: type=local,dest=/tmp/.buildx-cache-payment
+
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: 'IdentityServerCourse'
+            dns-name-label: ${{ secrets.USERNAME }}-paymentapi
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ secrets.USERNAME }}-paymentapi:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: ${{ secrets.USERNAME }}-paymentapi
+            ports: 80 443
+            location: 'northeurope'
+            environment-variables: ASPNETCORE_ENVIRONMENT=Production TZ=Europe/Stockholm Vault__Url=${{ secrets.AZURE_VAULTURL }} Vault__ClientId=${{ secrets.AZURE_CLIENTID }} Vault__Secret=${{ secrets.AZURE_SECRET }} Vault__TenantID=${{ secrets.AZURE_TENANTID }} GITHUB__SHA=${{ github.sha }}

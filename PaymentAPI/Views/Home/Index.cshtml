@@ -1,0 +1,31 @@
+﻿@using Infrastructure
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Hosting
+@inject IHostEnvironment hostEnvironment
+@inject IConfiguration configuration
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Payment API</h1>
+
+
+
+@{
+    string build = "Debug build";
+    if (Settings.IsReleaseBuild)
+    {
+        build = "Release build";
+    }
+
+    //Print out the first 8 characters of the GitHub SHA when deploying to production
+    //Should of course be a bit more hidden in real life, perhaps as a HTML comment?
+    var gitHubSha = configuration["GITHUB:SHA"] ?? "";
+    if (gitHubSha.Length > 8)
+    {
+        gitHubSha = " " + gitHubSha.Substring(0, 8);
+    }
+}
+<h5>
+    Service started: @Infrastructure.Settings.StartupTime (@hostEnvironment.EnvironmentName, @build@gitHubSha)
+</h5>

@@ -16,6 +16,8 @@ namespace PaymentAPI
 
         public static void Main(string[] args)
         {
+            Console.Title = _applicationName;
+
             Settings.StartupTime = DateTime.Now;
 
             CreateHostBuilder(args).Build().Run();

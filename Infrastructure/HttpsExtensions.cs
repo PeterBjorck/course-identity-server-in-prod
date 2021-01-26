@@ -34,6 +34,16 @@ namespace Infrastructure
                            {
 
                                //Add HTTPS configuration here
+                               httpsOptions.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
+
+                               //Only do this on Linux, different operating systems handles this differently
+                               if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                               {
+                                   httpsOptions.OnAuthenticate = (conContext, sslAuthOptions) =>
+                                   {
+                                       sslAuthOptions.CipherSuitesPolicy = cipherSuitesPolicy;
+                                   };
+                               }
 
                            });
                        });
@@ -41,5 +51,47 @@ namespace Infrastructure
 
             return webBuilder;
         }
+
+        private static readonly CipherSuitesPolicy cipherSuitesPolicy = new CipherSuitesPolicy
+        (
+            new System.Net.Security.TlsCipherSuite[]
+            {
+                // Cipher suits as recommended by: https://wiki.mozilla.org/Security/Server_Side_TLS
+                // Listed in preferred order.
+                // From: https://en.internet.nl
+                // High
+
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                TlsCipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                // Medium
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+                TlsCipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+                TlsCipherSuite.TLS_AES_128_GCM_SHA256,
+                TlsCipherSuite.TLS_AES_256_GCM_SHA384,
+                TlsCipherSuite.TLS_CHACHA20_POLY1305_SHA256
+            }
+        );
+
     }
+
 }

@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<ItemGroup>
+	  <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
 

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Configuration;
+using Infrastructure;
 
 namespace IdentityServerHost.Quickstart.UI
 {

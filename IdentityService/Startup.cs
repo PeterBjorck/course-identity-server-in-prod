@@ -36,6 +36,12 @@ namespace IdentityService
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseSecurityHeaders();
 
             app.UseRouting();
 

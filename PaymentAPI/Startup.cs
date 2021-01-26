@@ -43,8 +43,7 @@ namespace PaymentAPI
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-            app.UseSecurityHeaders();
-
+            
             app.UseRouting();
 
             app.UseRequestLocalization(

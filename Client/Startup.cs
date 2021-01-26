@@ -46,8 +46,7 @@ namespace Client
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-            app.UseSecurityHeaders();
-
+            
             app.UseStaticFiles();
 
             app.UseRouting();

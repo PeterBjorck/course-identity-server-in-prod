@@ -6,6 +6,7 @@ using IdentityServerHost.Quickstart.UI;
 using IdentityServerInMem;
 using IdentityService.Configuration;
 using Infrastructure;
+using Infrastructure.DataProtection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,9 @@ namespace IdentityService
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            if (_environment.EnvironmentName != "Offline")
+                services.AddDataProtectionWithSqlServer(_configuration);
+
             services.AddControllersWithViews();
 
             var builder = services.AddIdentityServer(options =>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Client.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Client.Controllers
 {
@@ -28,6 +29,7 @@ namespace Client.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

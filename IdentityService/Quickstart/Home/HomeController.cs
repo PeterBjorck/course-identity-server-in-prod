@@ -67,6 +67,7 @@ namespace IdentityServerHost.Quickstart.UI
         /// <summary>
         /// Shows the error page
         /// </summary>
+        [AllowAnonymous]
         public async Task<IActionResult> Error(string errorId)
         {
             var vm = new ErrorViewModel();

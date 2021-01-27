@@ -48,7 +48,8 @@ namespace PaymentAPI
             app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
-            
+            app.UseSecurityHeaders();
+
             app.UseRouting();
 
             app.UseRequestLocalization(

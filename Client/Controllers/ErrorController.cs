@@ -46,7 +46,7 @@ namespace IdentityService.Quickstart.Error
 
         // /error/notfound
         // Returns a 404 error code
-        public IActionResult NotFound()
+        public IActionResult NotFound404()
         {
             return StatusCode(404);
         }

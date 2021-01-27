@@ -57,6 +57,7 @@ namespace IdentityService
             else
             {
                 app.UseHsts();
+                app.UseExceptionHandler("/Home/Error");
             }
 
             app.UseSerilogRequestLogging();

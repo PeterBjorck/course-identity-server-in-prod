@@ -97,7 +97,6 @@ namespace IdentityService
                         });
             }
         }
-
         private static void ConfigureLogLevels(LoggerConfiguration options)
         {
             var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");

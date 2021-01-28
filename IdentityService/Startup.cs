@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using IdentityServerHost.Quickstart.UI;
-using IdentityServerInMem;
 using IdentityService.Configuration;
+using IdentityService.Configuration.Clients;
+using IdentityService.Configuration.Resources;
 using Infrastructure;
 using Infrastructure.DataProtection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,12 +40,16 @@ namespace IdentityService
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseSuccessEvents = true;
             }).AddTestUsers(TestUsers.Users)
-                .AddInMemoryIdentityResources(Config.IdentityResources)
-                .AddInMemoryApiScopes(Config.ApiScopes)
-                .AddInMemoryClients(Clients.GetClients());
+                .AddInMemoryIdentityResources(IdentityResourceData.Resources())
+                .AddInMemoryApiResources(ApiResourceData.Resources())
+                .AddInMemoryApiScopes(ApiScopeData.Resources())
+                .AddInMemoryClients(ClientData.GetClients());
 
-            // not recommended for production - you need to store your key material somewhere secure
-            builder.AddDeveloperSigningCredential();
+
+            if (_environment.EnvironmentName != "Offline")
+                builder.AddProductionSigningCredential(_configuration);
+            else
+                builder.AddDeveloperSigningCredential();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

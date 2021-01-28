@@ -6,6 +6,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\IdentityService.Configuration\IdentityService.Configuration.csproj" />
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
 

@@ -1,13 +1,14 @@
-﻿using Duende.IdentityServer;
+﻿using System.Collections.Generic;
+using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
-using System.Collections.Generic;
 
-namespace IdentityService.Configuration
+namespace IdentityService.Configuration.Clients
 {
-    public class Clients
+    public class ClientData
     {
         public static IEnumerable<Client> GetClients()
         {
+
             var clientDev = new Client
             {
                 ClientId = "authcodeflowclient_dev",        //Unique ID of the client
@@ -38,7 +39,8 @@ namespace IdentityService.Configuration
 
                 RedirectUris =
                 {
-                    "https://localhost:5001/signin-oidc"
+                    "https://localhost:5001/signin-oidc",
+                    "https://localhost:5002/signin-oidc"
                 },
 
                 PostLogoutRedirectUris =
@@ -129,5 +131,6 @@ namespace IdentityService.Configuration
                 clientProd
             };
         }
+
     }
 }

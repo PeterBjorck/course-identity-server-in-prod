@@ -52,7 +52,6 @@ namespace IdentityService
         {
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             Console.WriteLine($"ASPNETCORE_ENVIRONMENT='{env}'");
-
             switch (env)
             {
                 case "Production":

@@ -33,7 +33,7 @@ namespace Client
         public void ConfigureServices(IServiceCollection services)
         {
             if (_environment.EnvironmentName != "Offline")
-                services.AddDataProtectionWithSqlServer(_configuration);
+                services.AddDataProtectionWithSqlServerForClient(_configuration);
 
             services.AddAuthentication(options =>
             {

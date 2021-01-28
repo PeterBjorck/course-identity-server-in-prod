@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Azure.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Context;
 
 namespace Infrastructure.DataProtection
 {
@@ -13,47 +16,128 @@ namespace Infrastructure.DataProtection
     /// </summary>
     public static class DataProtectionExtensions
     {
-        public static void AddDataProtectionWithSqlServer(this IServiceCollection services, IConfiguration configuration)
+        public static void AddDataProtectionWithSqlServerForClient(this IServiceCollection services,
+            IConfiguration configuration)
         {
-            Log.Information("Configuring Data Protection with SQL Server started");
-            string connectionString = configuration.GetConnectionString("ConnectionString") ?? "";
-            string encryptionKeyUrl = configuration["DataProtection:EncryptionKeyUrl"] ??"";
-            string tenantId = configuration["Vault:TenantId"] ?? "";
-            string clientId = configuration["Vault:ClientId"] ?? "";
-            string clientSecret  = configuration["Vault:Secret"] ?? "";
+            Config config = GetConfig(configuration);
 
+            AddLogEntry("Configuring Data Protection with SQL Server", config);
 
-            CheckIfValueIsProvided(connectionString, nameof(connectionString), sensitiveValue: true);
-            CheckIfValueIsProvided(encryptionKeyUrl, nameof(encryptionKeyUrl), sensitiveValue: false);
-            CheckIfValueIsProvided(clientId, nameof(clientId), sensitiveValue: true);
-            CheckIfValueIsProvided(clientSecret, nameof(clientSecret), sensitiveValue: true);
+            ValidateAndLogParameters(config);
 
-            services.AddDbContext<DataProtectionContext>(options =>
-                options.UseSqlServer(connectionString));
+            services.AddDbContext<ClientDataProtectionContext>(options =>
+                options.UseSqlServer(config.ConnectionString));
 
             services.AddDataProtection()
-                .PersistKeysToDbContext<DataProtectionContext>()
-                .ProtectKeysWithAzureKeyVault(keyIdentifier: new Uri(encryptionKeyUrl),
-                                              tokenCredential: new ClientSecretCredential(tenantId, clientId, clientSecret));
+                .PersistKeysToDbContext<ClientDataProtectionContext>()
+                .ProtectKeysWithAzureKeyVault(keyIdentifier: new Uri(config.EncryptionKeyUrl),
+                new ClientSecretCredential(config.TenantId, config.ClientId, config.Secret));
 
-            Log.Information("Configuring Data Protection with SQL Server completed");
+            Log.Information("Configuring Client Data Protection with SQL Server completed");
         }
 
-        private static void CheckIfValueIsProvided(string value, string parameterName, bool sensitiveValue)
+
+        public static void AddDataProtectionWithSqlServerForIdentityService(this IServiceCollection services,
+            IConfiguration configuration)
         {
-            if (string.IsNullOrEmpty(value))
+            var config = GetConfig(configuration);
+
+            AddLogEntry("Configuring IdentityService Data Protection with SQL Server", config);
+
+            ValidateAndLogParameters(config);
+
+            services.AddDbContext<IdentityServiceDataProtectionContext>(options =>
+                options.UseSqlServer(config.ConnectionString));
+
+            services.AddDataProtection()
+                .PersistKeysToDbContext<IdentityServiceDataProtectionContext>()
+                .ProtectKeysWithAzureKeyVault(keyIdentifier: new Uri(config.EncryptionKeyUrl),
+                new ClientSecretCredential(config.TenantId, config.ClientId, config.Secret));
+
+            Log.Information("Configuring IdentityService Data Protection with SQL Server completed");
+        }
+
+
+        public static void AddDataProtectionWithSqlServerForPaymentApi(this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            var config = GetConfig(configuration);
+
+            AddLogEntry("Configuring PaymentAPI Data Protection with SQL Server", config);
+
+            ValidateAndLogParameters(config);
+
+            services.AddDbContext<PaymentApiDataProtectionContext>(options =>
+                options.UseSqlServer(config.ConnectionString));
+
+            services.AddDataProtection()
+                .PersistKeysToDbContext<PaymentApiDataProtectionContext>()
+                .ProtectKeysWithAzureKeyVault(keyIdentifier: new Uri(config.EncryptionKeyUrl),
+                new ClientSecretCredential(config.TenantId, config.ClientId, config.Secret));
+
+            Log.Information("Configuring PaymentAPI Data Protection with SQL Server completed");
+        }
+
+
+        private static void ValidateAndLogParameters(Config config)
+        {
+            //Validate that all input is there
+            if (string.IsNullOrEmpty(config.ConnectionString) ||
+                string.IsNullOrEmpty(config.EncryptionKeyUrl) ||
+                string.IsNullOrEmpty(config.ClientId) ||
+                string.IsNullOrEmpty(config.Secret))
             {
-                string msg =$"{parameterName} not found when configuring Data Protection with SQL Server";
-                Log.Fatal(msg);
-                throw new Exception(msg);
+                var exc = new NullReferenceException("Data Protection API configuration error, some or all config-parameters are missing");
+                Log.Fatal(exc, "Data Protection API configuration error");
+                throw exc;
             }
-            else
+        }
+
+        private static Config GetConfig(IConfiguration configuration)
+        {
+            return new Config(connectionString: configuration.GetConnectionString("ConnectionString") ?? "",
+                encryptionKeyUrl: configuration["DataProtection:EncryptionKeyUrl"] ?? "",
+                tenantId: configuration["Vault:TenantId"] ?? "",
+                clientId: configuration["Vault:ClientId"] ?? "",
+                secret: configuration["Vault:Secret"] ?? "");
+        }
+
+
+        private static void AddLogEntry(string message, Config config)
+        {
+            var consStr = Regex.Replace(config.ConnectionString, "Password=.*?;", "Password=********");
+            var keyUrl = config.EncryptionKeyUrl;
+            var clientId = config.ClientId;
+            var clientSecret = config.Secret;
+
+            if (String.IsNullOrEmpty(clientId) == false)
+                clientId = clientId.Substring(0, 1) + "...";
+
+            if (String.IsNullOrEmpty(clientSecret) == false)
+                clientSecret = clientSecret.Substring(0, 1) + "...";
+
+            Log.ForContext("ConnectionString", consStr)
+                .ForContext("encryptionKeyUrl", keyUrl)
+                .ForContext("vaultClientId", clientId)
+                .ForContext("vaultClientSecret", clientSecret)
+                .Information(message);
+        }
+
+        private class Config
+        {
+            public readonly string ConnectionString;
+            public readonly string EncryptionKeyUrl;
+            public readonly string TenantId;
+            public readonly string ClientId;
+            public readonly string Secret;
+
+            public Config(string connectionString, string encryptionKeyUrl, string tenantId, string clientId, string secret)
             {
-                //To assist troubleshooting in production, we display the first character for each sensitive config value
-                if (sensitiveValue)
-                    Log.Information($"- {parameterName}: {value.Substring(0, 1)}...");
-                else
-                    Log.Information($"- {parameterName}: {value}");
+                ConnectionString = connectionString;
+                EncryptionKeyUrl = encryptionKeyUrl;
+                TenantId = tenantId;
+                ClientId = clientId;
+                Secret = secret;
             }
         }
     }

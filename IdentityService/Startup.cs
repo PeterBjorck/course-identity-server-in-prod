@@ -33,7 +33,7 @@ namespace IdentityService
         public void ConfigureServices(IServiceCollection services)
         {
             if (_environment.EnvironmentName != "Offline")
-                services.AddDataProtectionWithSqlServer(_configuration);
+                services.AddDataProtectionWithSqlServerForIdentityService(_configuration);
 
             services.AddControllersWithViews();
 

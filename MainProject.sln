@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.Configuration", "IdentityService.Configuration\IdentityService.Configuration.csproj", "{E9681008-18FD-4253-AEF0-E03E7BAEEB15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer.EntityFramework", "IdentityServer.EntityFramework\IdentityServer.EntityFramework.csproj", "{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{E9681008-18FD-4253-AEF0-E03E7BAEEB15}.Release|x64.Build.0 = Release|Any CPU
 		{E9681008-18FD-4253-AEF0-E03E7BAEEB15}.Release|x86.ActiveCfg = Release|Any CPU
 		{E9681008-18FD-4253-AEF0-E03E7BAEEB15}.Release|x86.Build.0 = Release|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Debug|x64.Build.0 = Debug|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Debug|x86.Build.0 = Debug|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Release|x64.ActiveCfg = Release|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Release|x64.Build.0 = Release|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Release|x86.ActiveCfg = Release|Any CPU
+		{B426F9FA-5329-4A13-98B8-BA4EF35BDDEC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

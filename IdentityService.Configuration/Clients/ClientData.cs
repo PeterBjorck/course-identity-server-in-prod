@@ -116,6 +116,7 @@ namespace IdentityService.Configuration.Clients
                     IdentityServerConstants.StandardScopes.Email,
                     IdentityServerConstants.StandardScopes.Profile,
                     IdentityServerConstants.StandardScopes.Phone,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
                 },
 
                 AllowedCorsOrigins =

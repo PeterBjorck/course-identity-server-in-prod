@@ -6,6 +6,7 @@ using Infrastructure;
 using Infrastructure.DataProtection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -43,7 +44,21 @@ namespace IdentityService
                 .AddInMemoryIdentityResources(IdentityResourceData.Resources())
                 .AddInMemoryApiResources(ApiResourceData.Resources())
                 .AddInMemoryApiScopes(ApiScopeData.Resources())
-                .AddInMemoryClients(ClientData.GetClients());
+                .AddInMemoryClients(ClientData.GetClients())
+                .AddOperationalStore(options =>
+                {
+                    options.EnableTokenCleanup = true;
+                    //The number of records to remove at a time. Defaults to 100.
+                    options.TokenCleanupBatchSize = 100;
+                    options.TokenCleanupInterval = 3600; //Seconds
+
+                    options.ConfigureDbContext = b =>
+                    {
+                        options.ConfigureDbContext = c =>
+                        c.UseSqlServer(_configuration["ConnectionString"]);
+                    };
+                });
+
 
 
             if (_environment.EnvironmentName != "Offline")

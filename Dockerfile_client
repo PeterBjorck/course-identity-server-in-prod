@@ -8,6 +8,8 @@ COPY Client/*.csproj ./Client/
 COPY Infrastructure/*.csproj ./Infrastructure/
 COPY PaymentAPI/*.csproj ./PaymentAPI/
 COPY IdentityService/*.csproj ./IdentityService/
+COPY IdentityServer.EntityFramework/*.csproj ./IdentityServer.EntityFramework/
+COPY IdentityService.Configuration/*.csproj ./IdentityService.Configuration/
 
 RUN dotnet restore
 

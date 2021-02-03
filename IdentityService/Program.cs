@@ -127,7 +127,8 @@ namespace IdentityService
                            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                            .MinimumLevel.Override("System", LogEventLevel.Warning)
                            .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
-                           .MinimumLevel.Override("Microsoft.AspNetCore.Authorization", LogEventLevel.Information);
+                           .MinimumLevel.Override("Microsoft.AspNetCore.Authorization", LogEventLevel.Information)
+                           .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Debug);
                            
                     break;
             }

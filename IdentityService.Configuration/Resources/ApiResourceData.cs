@@ -9,7 +9,58 @@ namespace IdentityService.Configuration.Resources
         {
             return new ApiResource[]
             {
+                new ApiResource()
+                {
+                    Name = "apiresource1",
+                    ApiSecrets = new List<Secret>() { new Secret("myapisecret".Sha256()) },
 
+                    Scopes = new List<string> { "apiscope1"},
+
+                    UserClaims = new List<string>
+                    {
+                        "claim_apiresource1",
+                    }
+                },
+                new ApiResource()
+                {
+                    Name = "apiresource2",
+                    ApiSecrets = new List<Secret>() { new Secret("myapisecret".Sha256()) },
+
+                    Scopes = new List<string> { "apiscope1"},
+
+                    UserClaims = new List<string>
+                    {
+                        "claim_apiresource2",
+                    }
+                },
+                new ApiResource()
+                {
+                    Name = "employee",
+                    ApiSecrets = new List<Secret>() { new Secret("myapisecret".Sha256()) },
+
+                    Scopes = new List<string> { "employee"},
+
+                    UserClaims = new List<string>
+                    {
+                        "employmentid",
+                        "employmenttype",
+                        "admin"
+                    }
+                },
+                new ApiResource()
+                {
+                    Name = "payment",
+                    ApiSecrets = new List<Secret>() { new Secret("myapisecret".Sha256()) },
+
+                    Scopes = new List<string> { "payment"},
+
+                    UserClaims = new List<string>
+                    {
+                        "creditlimit",
+                        "paymentaccess",
+                        "admin"
+                    }
+                }
             };
         }
     }

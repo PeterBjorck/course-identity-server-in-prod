@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -32,6 +33,18 @@ namespace Client
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Add the listener to the ETW system
+            var listener = new IdentityModelEventListener();
+            if (_environment.EnvironmentName == "Development")
+            {
+                IdentityModelEventSource.Logger.LogLevel = System.Diagnostics.Tracing.EventLevel.Verbose;
+                //IdentityModelEventSource.ShowPII = true;
+            }
+            else
+            {
+                IdentityModelEventSource.Logger.LogLevel = System.Diagnostics.Tracing.EventLevel.Warning;
+            }
+
             if (_environment.EnvironmentName != "Offline")
                 services.AddDataProtectionWithSqlServerForClient(_configuration);
 
@@ -55,9 +68,10 @@ namespace Client
 
                 options.Scope.Clear();
                 options.Scope.Add("openid");
-                options.Scope.Add("profile");
                 options.Scope.Add("email");
-                options.Scope.Add("offline_access");
+                options.Scope.Add("profile");
+                options.Scope.Add("employee");
+                options.Scope.Add("payment");
 
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
@@ -71,6 +85,14 @@ namespace Client
                 };
 
             });
+
+            services.AddTransient<SerilogHttpMessageHandler>();
+
+            services.AddHttpClient("paymentapi", client => {
+                client.BaseAddress = new Uri(_configuration["paymentApiUrl"]);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.Timeout = TimeSpan.FromSeconds(5);
+            }).AddHttpMessageHandler<SerilogHttpMessageHandler>();
 
             services.AddControllersWithViews();
             services.AddHsts(opts =>

@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Serilog;
 
 namespace IdentityService
@@ -32,6 +33,18 @@ namespace IdentityService
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            //Add the listener to the ETW system
+            var listener = new IdentityModelEventListener();
+            if (_environment.EnvironmentName == "Development")
+            {
+                IdentityModelEventSource.Logger.LogLevel = System.Diagnostics.Tracing.EventLevel.Verbose;
+                //IdentityModelEventSource.ShowPII = true;
+            }
+            else
+            {
+                IdentityModelEventSource.Logger.LogLevel = System.Diagnostics.Tracing.EventLevel.Warning;
+            }
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(_configuration["ConnectionString"]);

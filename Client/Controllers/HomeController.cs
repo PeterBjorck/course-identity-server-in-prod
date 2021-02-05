@@ -7,16 +7,22 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Client.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Net.Http;
+using Microsoft.AspNetCore.Authentication;
+using IdentityModel.Client;
+using Newtonsoft.Json.Linq;
 
 namespace Client.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         public IActionResult Index()
@@ -24,8 +30,16 @@ namespace Client.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> Privacy()
         {
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+
+            var client = _httpClientFactory.CreateClient("paymentapi");
+            client.SetBearerToken(accessToken);
+
+            var response = await client.GetStringAsync("/payments/get");
+            ViewBag.Json = JObject.Parse(response).ToString();
+
             return View();
         }
 

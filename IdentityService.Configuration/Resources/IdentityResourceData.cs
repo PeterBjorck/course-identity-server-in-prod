@@ -15,7 +15,7 @@ namespace IdentityService.Configuration.Resources
                     new IdentityResource(name: "idresource1", userClaims: new string[] {"claim_idresource1"}),
                     new IdentityResource(name: "employee", userClaims: new string[] {
                         "employmentid",
-                        "employmenttype",
+                        "employeetype",
                         "admin"
                     }),
             };

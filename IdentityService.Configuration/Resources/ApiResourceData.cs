@@ -35,21 +35,7 @@ namespace IdentityService.Configuration.Resources
                 },
                 new ApiResource()
                 {
-                    Name = "employee",
-                    ApiSecrets = new List<Secret>() { new Secret("myapisecret".Sha256()) },
-
-                    Scopes = new List<string> { "employee"},
-
-                    UserClaims = new List<string>
-                    {
-                        "employmentid",
-                        "employmenttype",
-                        "admin"
-                    }
-                },
-                new ApiResource()
-                {
-                    Name = "payment",
+                    Name = "paymentapi",
                     ApiSecrets = new List<Secret>() { new Secret("myapisecret".Sha256()) },
 
                     Scopes = new List<string> { "payment"},

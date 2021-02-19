@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using IdentityModel;
 using Infrastructure;
 using Infrastructure.DataProtection;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -15,7 +16,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
 using Serilog;
+using SessionStore;
 
 namespace Client
 {
@@ -56,7 +59,12 @@ namespace Client
             {
                 options.LogoutPath = "/User/Logout";
                 options.AccessDeniedPath = "/User/AccessDenied";
-
+                options.SessionStore = new MySessionStore();
+                options.Events.OnSigningOut = async e =>
+                {
+                    // revoke refresh token on sign-out
+                    await e.HttpContext.RevokeUserRefreshTokenAsync();
+                };
 
             }).AddOpenIdConnect(options =>
             {
@@ -72,6 +80,7 @@ namespace Client
                 options.Scope.Add("profile");
                 options.Scope.Add("employee");
                 options.Scope.Add("payment");
+                options.Scope.Add("offline_access");
 
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
@@ -88,10 +97,12 @@ namespace Client
 
             services.AddTransient<SerilogHttpMessageHandler>();
 
-            services.AddHttpClient("paymentapi", client => {
+            // registers HTTP client that uses the managed user access token
+            services.AddUserAccessTokenClient("paymentapi", client =>
+            {
                 client.BaseAddress = new Uri(_configuration["paymentApiUrl"]);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
                 client.Timeout = TimeSpan.FromSeconds(5);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
             }).AddHttpMessageHandler<SerilogHttpMessageHandler>();
 
             services.AddControllersWithViews();
@@ -100,6 +111,18 @@ namespace Client
                 opts.IncludeSubDomains = true;
                 opts.MaxAge = TimeSpan.FromSeconds(15768000);
             });
+
+            // adds user and client access token management
+            services.AddAccessTokenManagement(options =>
+            {
+                options.User.RefreshBeforeExpiration = TimeSpan.FromSeconds(5);
+            }).ConfigureBackchannelHttpClient(
+            ).AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(new[]
+            {
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(3)
+             }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

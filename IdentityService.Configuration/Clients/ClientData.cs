@@ -78,6 +78,8 @@ namespace IdentityService.Configuration.Clients
                 ClientUri = "https://www.edument.se",
                 RequirePkce = true,
                 AllowOfflineAccess = true, //Accept refresh tokens
+                RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                
                 AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
 
                 // When requesting both an id token and access token, should the user claims always
@@ -89,16 +91,18 @@ namespace IdentityService.Configuration.Clients
                 //This is useful to harden flows that allow multiple response types 
                 //(e.g. by disallowing a hybrid flow client that is supposed to  use code id_token to add the token response type and thus leaking the token to the browser.
                 AllowAccessTokensViaBrowser = false,
+                AccessTokenLifetime = 45,
 
                 AllowedScopes =
-                    {
-                        //Standard scopes
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Email,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        "employee",
-                        "payment"
-                    },
+                {
+                    //Standard scopes
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Email,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "employee",
+                    "payment"
+                },
 
                 AlwaysSendClientClaims = false,
                 ClientClaimsPrefix = "client_",
